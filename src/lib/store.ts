@@ -1,91 +1,42 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-import { CVData, Template, initialCVData } from '@/types/cv';
+import { persist, createJSONStorage } from 'zustand/middleware';
+import { CVData, Design, initialCVData } from '@/types/cv';
 
 interface CVStore {
   cvData: CVData;
-  activeTemplate: string;
-  availableTemplates: Record<string, Template>;
-  customization: {
-    primaryColor: string;
-    secondaryColor: string;
-    font: string;
-    spacing: 'compact' | 'normal' | 'spacious';
-  };
-  updatePersonalInfo: (data: any) => void;
-  updateSection: (sectionKey: string, data: any) => void;
-  addItemToSection: (sectionKey: string, item: any) => void;
-  removeItemFromSection: (sectionKey: string, index: number) => void;
-  updateItemInSection: (sectionKey: string, index: number, item: any) => void;
-  reorderSection: (sectionKey: string, startIndex: number, endIndex: number) => void;
-  setActiveTemplate: (templateId: string) => void;
-  updateCustomization: (customization: Partial<CVStore['customization']>) => void;
+  activeSection: string | null;
+  isPreviewMode: boolean;
+  updatePersonalInfo: (data: Partial<CVData['personalInfo']>) => void;
+  updateSection: (sectionKey: keyof CVData['sections'], data: { visible?: boolean; order?: number }) => void;
+  addWorkExperience: () => void;
+  updateWorkExperience: (id: string, data: Partial<CVData['workExperience'][0]>) => void;
+  removeWorkExperience: (id: string) => void;
+  addEducation: () => void;
+  updateEducation: (id: string, data: Partial<CVData['education'][0]>) => void;
+  removeEducation: (id: string) => void;
+  addSkill: () => void;
+  updateSkill: (id: string, data: Partial<CVData['skills'][0]>) => void;
+  removeSkill: (id: string) => void;
+  addProject: () => void;
+  updateProject: (id: string, data: Partial<CVData['projects'][0]>) => void;
+  removeProject: (id: string) => void;
+  addCertification: () => void;
+  updateCertification: (id: string, data: Partial<CVData['certifications'][0]>) => void;
+  removeCertification: (id: string) => void;
+  updateDesign: (design: Partial<Design>) => void;
+  setActiveSection: (section: string | null) => void;
+  togglePreviewMode: () => void;
   reset: () => void;
 }
+
+const generateId = () => Math.random().toString(36).substr(2, 9);
 
 export const useStore = create<CVStore>()(
   persist(
     (set) => ({
       cvData: initialCVData,
-      activeTemplate: 'modern',
-      availableTemplates: {
-        modern: {
-          id: 'modern',
-          name: 'Modern',
-          thumbnail: '/templates/modern.png',
-        },
-        classic: {
-          id: 'classic',
-          name: 'Classic',
-          thumbnail: '/templates/classic.png',
-        },
-        minimal: {
-          id: 'minimal',
-          name: 'Minimal',
-          thumbnail: '/templates/minimal.png',
-        },
-        professional: {
-          id: 'professional',
-          name: 'Professional',
-          thumbnail: '/templates/professional.png',
-        },
-        creative: {
-          id: 'creative',
-          name: 'Creative',
-          thumbnail: '/templates/creative.png',
-        },
-        executive: {
-          id: 'executive',
-          name: 'Executive',
-          thumbnail: '/templates/executive.png',
-        },
-        elegant: {
-          id: 'elegant',
-          name: 'Elegant',
-          thumbnail: '/templates/elegant.png',
-        },
-        corporate: {
-          id: 'corporate',
-          name: 'Corporate',
-          thumbnail: '/templates/corporate.png',
-        },
-        simple: {
-          id: 'simple',
-          name: 'Simple',
-          thumbnail: '/templates/simple.png',
-        },
-        technical: {
-          id: 'technical',
-          name: 'Technical',
-          thumbnail: '/templates/technical.png',
-        },
-      },
-      customization: {
-        primaryColor: '#2563eb', // Blue
-        secondaryColor: '#4b5563', // Gray
-        font: 'Inter',
-        spacing: 'normal',
-      },
+      activeSection: null,
+      isPreviewMode: false,
       updatePersonalInfo: (data) =>
         set((state) => ({
           cvData: { ...state.cvData, personalInfo: { ...state.cvData.personalInfo, ...data } },
@@ -94,54 +45,204 @@ export const useStore = create<CVStore>()(
         set((state) => ({
           cvData: {
             ...state.cvData,
-            [sectionKey]: data,
+            sections: {
+              ...state.cvData.sections,
+              [sectionKey]: { ...state.cvData.sections[sectionKey], ...data },
+            },
           },
         })),
-      addItemToSection: (sectionKey, item) =>
+      addWorkExperience: () =>
         set((state) => ({
           cvData: {
             ...state.cvData,
-            [sectionKey]: [...(state.cvData[sectionKey] || []), item],
+            workExperience: [
+              ...state.cvData.workExperience,
+              {
+                id: generateId(),
+                company: '',
+                position: '',
+                location: '',
+                startDate: '',
+                endDate: '',
+                current: false,
+                description: '',
+                achievements: [],
+              },
+            ],
           },
         })),
-      removeItemFromSection: (sectionKey, index) =>
+      updateWorkExperience: (id, data) =>
         set((state) => ({
           cvData: {
             ...state.cvData,
-            [sectionKey]: state.cvData[sectionKey].filter((_, i) => i !== index),
-          },
-        })),
-      updateItemInSection: (sectionKey, index, item) =>
-        set((state) => ({
-          cvData: {
-            ...state.cvData,
-            [sectionKey]: state.cvData[sectionKey].map((oldItem, i) =>
-              i === index ? { ...oldItem, ...item } : oldItem
+            workExperience: state.cvData.workExperience.map((exp) =>
+              exp.id === id ? { ...exp, ...data } : exp
             ),
           },
         })),
-      reorderSection: (sectionKey, startIndex, endIndex) =>
-        set((state) => {
-          const section = [...state.cvData[sectionKey]];
-          const [removed] = section.splice(startIndex, 1);
-          section.splice(endIndex, 0, removed);
-          return {
-            cvData: {
-              ...state.cvData,
-              [sectionKey]: section,
-            },
-          };
-        }),
-      setActiveTemplate: (templateId) =>
-        set({ activeTemplate: templateId }),
-      updateCustomization: (customization) =>
+      removeWorkExperience: (id) =>
         set((state) => ({
-          customization: { ...state.customization, ...customization },
+          cvData: {
+            ...state.cvData,
+            workExperience: state.cvData.workExperience.filter((exp) => exp.id !== id),
+          },
         })),
+      addEducation: () =>
+        set((state) => ({
+          cvData: {
+            ...state.cvData,
+            education: [
+              ...state.cvData.education,
+              {
+                id: generateId(),
+                institution: '',
+                degree: '',
+                field: '',
+                location: '',
+                startDate: '',
+                endDate: '',
+                current: false,
+                description: '',
+              },
+            ],
+          },
+        })),
+      updateEducation: (id, data) =>
+        set((state) => ({
+          cvData: {
+            ...state.cvData,
+            education: state.cvData.education.map((edu) =>
+              edu.id === id ? { ...edu, ...data } : edu
+            ),
+          },
+        })),
+      removeEducation: (id) =>
+        set((state) => ({
+          cvData: {
+            ...state.cvData,
+            education: state.cvData.education.filter((edu) => edu.id !== id),
+          },
+        })),
+      addSkill: () =>
+        set((state) => ({
+          cvData: {
+            ...state.cvData,
+            skills: [
+              ...state.cvData.skills,
+              {
+                id: generateId(),
+                name: '',
+                level: 'Beginner',
+                category: '',
+              },
+            ],
+          },
+        })),
+      updateSkill: (id, data) =>
+        set((state) => ({
+          cvData: {
+            ...state.cvData,
+            skills: state.cvData.skills.map((skill) =>
+              skill.id === id ? { ...skill, ...data } : skill
+            ),
+          },
+        })),
+      removeSkill: (id) =>
+        set((state) => ({
+          cvData: {
+            ...state.cvData,
+            skills: state.cvData.skills.filter((skill) => skill.id !== id),
+          },
+        })),
+      addProject: () =>
+        set((state) => ({
+          cvData: {
+            ...state.cvData,
+            projects: [
+              ...state.cvData.projects,
+              {
+                id: generateId(),
+                name: '',
+                description: '',
+                startDate: '',
+                endDate: '',
+                current: false,
+                technologies: [],
+              },
+            ],
+          },
+        })),
+      updateProject: (id, data) =>
+        set((state) => ({
+          cvData: {
+            ...state.cvData,
+            projects: state.cvData.projects.map((project) =>
+              project.id === id ? { ...project, ...data } : project
+            ),
+          },
+        })),
+      removeProject: (id) =>
+        set((state) => ({
+          cvData: {
+            ...state.cvData,
+            projects: state.cvData.projects.filter((project) => project.id !== id),
+          },
+        })),
+      addCertification: () =>
+        set((state) => ({
+          cvData: {
+            ...state.cvData,
+            certifications: [
+              ...state.cvData.certifications,
+              {
+                id: generateId(),
+                name: '',
+                issuer: '',
+                date: '',
+                expires: false,
+                expiryDate: '',
+                url: '',
+              },
+            ],
+          },
+        })),
+      updateCertification: (id, data) =>
+        set((state) => ({
+          cvData: {
+            ...state.cvData,
+            certifications: state.cvData.certifications.map((cert) =>
+              cert.id === id ? { ...cert, ...data } : cert
+            ),
+          },
+        })),
+      removeCertification: (id) =>
+        set((state) => ({
+          cvData: {
+            ...state.cvData,
+            certifications: state.cvData.certifications.filter((cert) => cert.id !== id),
+          },
+        })),
+      updateDesign: (design) =>
+        set((state) => ({
+          cvData: {
+            ...state.cvData,
+            design: { ...state.cvData.design, ...design },
+          },
+        })),
+      setActiveSection: (section) => set({ activeSection: section }),
+      togglePreviewMode: () => set((state) => ({ isPreviewMode: !state.isPreviewMode })),
       reset: () => set({ cvData: initialCVData }),
     }),
     {
       name: 'cv-builder-storage',
+      storage: createJSONStorage(() => localStorage),
+      version: 1,
+      migrate: (persistedState: any, version: number) => {
+        if (version === 0) {
+          return { cvData: initialCVData };
+        }
+        return persistedState as { cvData: CVData };
+      },
     }
   )
 );

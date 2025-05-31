@@ -5,14 +5,17 @@ import { useStore } from '@/lib/store';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Pencil, User } from 'lucide-react';
 
 export default function PersonalInfoForm() {
-  const { cv, updatePersonalInfo } = useStore();
-  const { personalInfo } = cv;
+  const { cvData, updatePersonalInfo } = useStore((state) => ({
+    cvData: state.cvData,
+    updatePersonalInfo: state.updatePersonalInfo
+  }));
+
+  const { personalInfo } = cvData;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     updatePersonalInfo({
@@ -182,5 +185,3 @@ export default function PersonalInfoForm() {
     </div>
   );
 }
-
-export default PersonalInfoForm

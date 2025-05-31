@@ -17,14 +17,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Check } from 'lucide-react';
 import { motion } from 'framer-motion';
-
-const templates = [
-  { id: 'modern', name: 'Modern' },
-  { id: 'classic', name: 'Classic' },
-  { id: 'minimalist', name: 'Minimalist' },
-  { id: 'professional', name: 'Professional' },
-  { id: 'creative', name: 'Creative' },
-];
+import { TEMPLATES_LIST } from '@/types/cv';
 
 const fontOptions = [
   { value: 'Inter', label: 'Inter' },
@@ -45,9 +38,24 @@ const colors = [
   { value: '#0F172A', label: 'Navy' },
 ];
 
-export default function DesignCustomizer() {
-  const { cv, updateDesign } = useStore();
-  const { design } = cv;
+interface DesignCustomizerProps {
+  onClose?: () => void;
+}
+
+export default function DesignCustomizer({ onClose }: DesignCustomizerProps) {
+  const { cvData, updateDesign } = useStore((state) => ({
+    cvData: state.cvData,
+    updateDesign: state.updateDesign,
+  }));
+
+  const design = cvData?.design || {
+    template: 'modern',
+    color: '#3B82F6',
+    font: 'Inter',
+    fontSize: 'medium',
+    spacing: 'normal',
+    showProfileImage: false,
+  };
 
   const handleTemplateChange = (templateId: string) => {
     updateDesign({ template: templateId });
@@ -84,7 +92,7 @@ export default function DesignCustomizer() {
         
         <TabsContent value="templates" className="space-y-4 pt-4">
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-            {templates.map((template) => (
+            {TEMPLATES_LIST.map((template) => (
               <div
                 key={template.id}
                 className="relative"
@@ -97,7 +105,6 @@ export default function DesignCustomizer() {
                   `}
                 >
                   <div className="aspect-[210/297] bg-card">
-                    {/* Template thumbnail - would be replaced with actual thumbnails */}
                     <div className={`w-full h-full p-3 flex flex-col ${
                       template.id === 'modern' ? 'divide-y' :
                       template.id === 'classic' ? 'items-center text-center' :

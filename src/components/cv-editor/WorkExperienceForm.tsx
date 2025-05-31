@@ -13,8 +13,14 @@ import { PlusCircle, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function WorkExperienceForm() {
-  const { cv, addWorkExperience, updateWorkExperience, removeWorkExperience } = useStore();
-  const { workExperience } = cv;
+  const { cvData, addWorkExperience, updateWorkExperience, removeWorkExperience } = useStore((state) => ({
+    cvData: state.cvData,
+    addWorkExperience: state.addWorkExperience,
+    updateWorkExperience: state.updateWorkExperience,
+    removeWorkExperience: state.removeWorkExperience,
+  }));
+
+  const workExperience = cvData?.workExperience || [];
 
   const handleChange = (id: string, field: string, value: string | boolean) => {
     updateWorkExperience(id, { [field]: value });
@@ -140,5 +146,3 @@ export default function WorkExperienceForm() {
     </div>
   );
 }
-
-export default WorkExperienceForm

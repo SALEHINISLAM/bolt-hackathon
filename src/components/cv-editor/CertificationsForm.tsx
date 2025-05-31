@@ -11,8 +11,14 @@ import { PlusCircle, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function CertificationsForm() {
-  const { cv, addCertification, updateCertification, removeCertification } = useStore();
-  const { certifications } = cv;
+  const { cvData, addCertification, updateCertification, removeCertification } = useStore((state) => ({
+    cvData: state.cvData,
+    addCertification: state.addCertification,
+    updateCertification: state.updateCertification,
+    removeCertification: state.removeCertification
+  }));
+
+  const certifications = cvData?.certifications || [];
 
   const handleChange = (id: string, field: string, value: string | boolean) => {
     updateCertification(id, { [field]: value });

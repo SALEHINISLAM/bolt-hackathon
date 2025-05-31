@@ -17,12 +17,12 @@ const PDFExport = dynamic(() => import('./PDFExport'), {
   loading: () => <div>Loading PDF exporter...</div>
 });
 
-export default function CVPreview() {
-  const { cv } = useStore();
+export function CVPreview() {
+  const { cvData } = useStore();
   const cvRef = useRef<HTMLDivElement>(null);
 
   // Map template IDs to components
-  const templates: Record<string, React.ComponentType<{ cv: typeof cv }>> = {
+  const templates: Record<string, React.ComponentType<{ cv: typeof cvData }>> = {
     modern: ModernTemplate,
     classic: ClassicTemplate,
     minimalist: MinimalistTemplate,
@@ -31,32 +31,47 @@ export default function CVPreview() {
   };
 
   // Get the selected template component, fallback to Modern
-  const TemplateComponent = templates[cv.design.template] || ModernTemplate;
+  const TemplateComponent = templates[cvData.design.template] || ModernTemplate;
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="flex justify-center mb-4">
-        <div className="bg-white shadow-lg border">
-          <div 
-            className="w-[210mm] min-h-[297mm] mx-auto relative overflow-hidden bg-white"
-            style={{ 
-              fontFamily: cv.design.font || 'Inter',
-              fontSize: {
-                small: '0.9rem',
-                medium: '1rem',
-                large: '1.1rem'
-              }[cv.design.fontSize || 'medium'],
-            }}
-            ref={cvRef}
-          >
-            <TemplateComponent cv={cv} />
-          </div>
+    <div className="flex flex-col items-center h-full">
+      <div className="bg-white shadow-lg border my-8">
+        <div 
+          ref={cvRef}
+          className="relative bg-white overflow-hidden mx-auto"
+          style={{ 
+            width: '210mm',
+            minHeight: '297mm',
+            maxHeight: '297mm',
+            fontFamily: cvData.design.font || 'Inter',
+            fontSize: {
+              small: '10pt',
+              medium: '11pt',
+              large: '12pt'
+            }[cvData.design.fontSize || 'medium'],
+            padding: {
+              compact: '15mm',
+              normal: '20mm',
+              spacious: '25mm'
+            }[cvData.design.spacing || 'normal'],
+            lineHeight: '1.5',
+            letterSpacing: '0.01em',
+            WebkitPrintColorAdjust: 'exact',
+            printColorAdjust: 'exact',
+            pageBreakInside: 'avoid',
+            pageBreakBefore: 'auto',
+            pageBreakAfter: 'auto'
+          }}
+        >
+          <TemplateComponent cv={cvData} />
         </div>
       </div>
       
-      <PDFExport contentRef={cvRef} fileName={`${cv.personalInfo.firstName}-${cv.personalInfo.lastName}-CV`} />
+      <div className="sticky bottom-4 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 p-4 rounded-lg shadow-lg">
+        <PDFExport contentRef={cvRef} fileName={`${cvData.personalInfo.firstName}-${cvData.personalInfo.lastName}-CV`} />
+      </div>
     </div>
   );
 }
 
-export { CVPreview }
+export default CVPreview

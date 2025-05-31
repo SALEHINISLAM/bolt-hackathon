@@ -27,9 +27,8 @@ export default function CVBuilder() {
 
   const handleExport = () => {
     // This will be implemented with actual PDF export logic
-    toast({
-      title: "Export Started",
-      description: "Your CV is being prepared for download...",
+    toast('Export Started', {
+      description: "Your CV is being prepared for download..."
     });
   };
 

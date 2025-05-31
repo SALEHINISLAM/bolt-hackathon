@@ -11,8 +11,14 @@ import { PlusCircle, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function SkillsForm() {
-  const { cv, addSkill, updateSkill, removeSkill } = useStore();
-  const { skills } = cv;
+  const { cvData, addSkill, updateSkill, removeSkill } = useStore((state) => ({
+    cvData: state.cvData,
+    addSkill: state.addSkill,
+    updateSkill: state.updateSkill,
+    removeSkill: state.removeSkill,
+  }));
+
+  const skills = cvData?.skills || [];
 
   const handleNameChange = (id: string, value: string) => {
     updateSkill(id, { name: value });
@@ -108,5 +114,3 @@ export default function SkillsForm() {
     </div>
   );
 }
-
-export default SkillsForm

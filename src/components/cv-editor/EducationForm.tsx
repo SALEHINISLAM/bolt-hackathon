@@ -11,8 +11,14 @@ import { PlusCircle, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function EducationForm() {
-  const { cv, addEducation, updateEducation, removeEducation } = useStore();
-  const { education } = cv;
+  const { cvData, addEducation, updateEducation, removeEducation } = useStore((state) => ({
+    cvData: state.cvData,
+    addEducation: state.addEducation,
+    updateEducation: state.updateEducation,
+    removeEducation: state.removeEducation,
+  }));
+
+  const education = cvData?.education || [];
 
   const handleChange = (id: string, field: string, value: string) => {
     updateEducation(id, { [field]: value });
@@ -146,5 +152,3 @@ export default function EducationForm() {
     </div>
   );
 }
-
-export default EducationForm

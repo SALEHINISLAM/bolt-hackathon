@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { useStore } from '@/lib/store';
 import { 
   Accordion, 
@@ -13,20 +13,60 @@ import WorkExperienceForm from './WorkExperienceForm';
 import EducationForm from './EducationForm';
 import SkillsForm from './SkillsForm';
 import ProjectsForm from './ProjectsForm';
-import CertificationsForm from './CretificationsForm';
-import DesignCustomizer from './DesignCustomizer';
+import CertificationsForm from './CertificationsForm';
 import { motion } from 'framer-motion';
 
-export default function CVEditor() {
-  const { cv, setActiveSection, activeSection } = useStore();
+export function CVEditor() {
+  const { cvData, setActiveSection, activeSection } = useStore(
+    useCallback((state) => ({
+      cvData: state.cvData,
+      setActiveSection: state.setActiveSection,
+      activeSection: state.activeSection
+    }), [])
+  );
 
-  const handleSectionOpen = (section: string) => {
+  const handleSectionOpen = useCallback((section: string) => {
     setActiveSection(section);
-  };
+  }, [setActiveSection]);
 
-  // Sort sections by their order
-  const orderedSections = Object.entries(cv.sections)
-    .sort(([, a], [, b]) => a.order - b.order);
+  const orderedSections = useMemo(() => {
+    return Object.entries(cvData.sections)
+      .sort(([, a], [, b]) => a.order - b.order)
+      .filter(([, section]) => section.visible);
+  }, [cvData.sections]);
+
+  const renderSectionComponent = useCallback((sectionKey: string) => {
+    switch (sectionKey) {
+      case 'personalInfo':
+        return <PersonalInfoForm />;
+      case 'workExperience':
+        return <WorkExperienceForm />;
+      case 'education':
+        return <EducationForm />;
+      case 'skills':
+        return <SkillsForm />;
+      case 'projects':
+        return <ProjectsForm />;
+      case 'certifications':
+        return <CertificationsForm />;
+      default:
+        return null;
+    }
+  }, []);
+
+  const getSectionTitle = useCallback((section: string): string => {
+    const titles: Record<string, string> = {
+      personalInfo: 'Personal Information',
+      workExperience: 'Work Experience',
+      education: 'Education',
+      skills: 'Skills',
+      projects: 'Projects',
+      certifications: 'Certifications',
+      languages: 'Languages',
+      publications: 'Publications',
+    };
+    return titles[section] || section;
+  }, []);
 
   return (
     <div className="max-w-3xl mx-auto">
@@ -43,72 +83,35 @@ export default function CVEditor() {
           defaultValue="personalInfo"
           value={activeSection || undefined}
           onValueChange={handleSectionOpen}
-          className="w-full"
+          className="w-full space-y-4"
         >
-          <AccordionItem value="design" className="border rounded-lg mb-4 shadow-sm">
+          <AccordionItem value="personalInfo" className="border rounded-lg shadow-sm">
             <AccordionTrigger className="px-4 py-2">
-              Design & Templates
+              Personal Information
             </AccordionTrigger>
             <AccordionContent className="p-4 pt-2">
-              <DesignCustomizer />
+              <PersonalInfoForm />
             </AccordionContent>
           </AccordionItem>
 
-          {orderedSections.map(([sectionKey, sectionData]) => {
-            if (!sectionData.visible && sectionKey !== 'personalInfo') return null;
-
-            return (
-              <AccordionItem 
-                key={sectionKey} 
-                value={sectionKey}
-                className="border rounded-lg mb-4 shadow-sm"
-              >
-                <AccordionTrigger className="px-4 py-2">
-                  {getSectionTitle(sectionKey)}
-                </AccordionTrigger>
-                <AccordionContent className="p-4 pt-2">
-                  {getSectionComponent(sectionKey)}
-                </AccordionContent>
-              </AccordionItem>
-            );
-          })}
+          {orderedSections.map(([sectionKey]) => (
+            <AccordionItem 
+              key={sectionKey} 
+              value={sectionKey}
+              className="border rounded-lg shadow-sm"
+            >
+              <AccordionTrigger className="px-4 py-2">
+                {getSectionTitle(sectionKey)}
+              </AccordionTrigger>
+              <AccordionContent className="p-4 pt-2">
+                {renderSectionComponent(sectionKey)}
+              </AccordionContent>
+            </AccordionItem>
+          ))}
         </Accordion>
       </motion.div>
     </div>
   );
 }
 
-function getSectionTitle(section: string): string {
-  const titles: Record<string, string> = {
-    personalInfo: 'Personal Information',
-    workExperience: 'Work Experience',
-    education: 'Education',
-    skills: 'Skills',
-    projects: 'Projects',
-    certifications: 'Certifications',
-    languages: 'Languages',
-    publications: 'Publications',
-  };
-  return titles[section] || section;
-}
-
-function getSectionComponent(section: string): React.ReactNode {
-  switch (section) {
-    case 'personalInfo':
-      return <PersonalInfoForm />;
-    case 'workExperience':
-      return <WorkExperienceForm />;
-    case 'education':
-      return <EducationForm />;
-    case 'skills':
-      return <SkillsForm />;
-    case 'projects':
-      return <ProjectsForm />;
-    case 'certifications':
-      return <CertificationsForm />;
-    default:
-      return null;
-  }
-}
-
-export default CVEditor
+export default CVEditor;

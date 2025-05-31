@@ -1,12 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useStore } from '@/lib/store';
 import { CVEditor } from '@/components/cv-editor/CVEditor';
 import { CVPreview } from '@/components/cv-preview/CVPreview';
 import { TemplateSelector } from '@/components/template-selector/TemplateSelector';
-import { CustomizationPanel } from '@/components/customization/CustomizationPanel';
-import { ExportButton } from '@/components/export/ExportButton';
+import DesignCustomizer from '@/components/cv-editor/DesignCustomizer';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { MoonIcon, SunIcon } from 'lucide-react';
@@ -14,14 +13,19 @@ import { useTheme } from 'next-themes';
 import { motion } from 'framer-motion';
 
 export default function Home() {
+  const [isMounted, setIsMounted] = useState(false);
   const { setTheme, theme } = useTheme();
   const [activeTab, setActiveTab] = useState<string>('editor');
   const [showTemplates, setShowTemplates] = useState<boolean>(false);
   const [showCustomization, setShowCustomization] = useState<boolean>(false);
   
-  const activeTemplate = useStore((state) => state.activeTemplate);
-  const templates = useStore((state) => state.availableTemplates);
-  const selectedTemplate = templates[activeTemplate];
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted) {
+    return null;
+  }
 
   return (
     <main className="min-h-screen bg-background">
@@ -52,7 +56,6 @@ export default function Home() {
             >
               Customize
             </Button>
-            <ExportButton />
             <Button
               variant="ghost"
               size="icon"
@@ -83,7 +86,7 @@ export default function Home() {
             exit={{ opacity: 0, y: -20 }}
             className="mb-6"
           >
-            <CustomizationPanel onClose={() => setShowCustomization(false)} />
+            <DesignCustomizer onClose={() => setShowCustomization(false)} />
           </motion.div>
         )}
 

@@ -11,8 +11,14 @@ import { PlusCircle, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function ProjectsForm() {
-  const { cv, addProject, updateProject, removeProject } = useStore();
-  const { projects } = cv;
+  const { cvData, addProject, updateProject, removeProject } = useStore((state) => ({
+    cvData: state.cvData,
+    addProject: state.addProject,
+    updateProject: state.updateProject,
+    removeProject: state.removeProject,
+  }));
+
+  const projects = cvData?.projects || [];
 
   const handleChange = (id: string, field: string, value: string) => {
     updateProject(id, { [field]: value });
@@ -130,5 +136,3 @@ export default function ProjectsForm() {
     </div>
   );
 }
-
-export default ProjectsForm
