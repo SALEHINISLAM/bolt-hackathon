@@ -17,7 +17,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
-import { Metadata } from "next";
+import Link from "next/link";
+// import { Metadata } from "next";
 
 interface Coach {
   _id: string;
@@ -30,18 +31,18 @@ interface Coach {
   experience: number;
 }
 
-export const metadata: Metadata = {
-  title: "Career Coaching Platform - Your Career, Your Coach, Your Success",
-  description:
-    "Find expert career coaches to help you advance your career. Personalized coaching sessions with industry professionals.",
-  keywords:
-    "career coaching, professional development, career advancement, executive coaching",
-  openGraph: {
-    title: "Career Coaching Platform",
-    description: "Find expert career coaches to help you advance your career",
-    type: "website",
-  },
-};
+// export const metadata: Metadata = {
+//   title: "Career Coaching Platform - Your Career, Your Coach, Your Success",
+//   description:
+//     "Find expert career coaches to help you advance your career. Personalized coaching sessions with industry professionals.",
+//   keywords:
+//     "career coaching, professional development, career advancement, executive coaching",
+//   openGraph: {
+//     title: "Career Coaching Platform",
+//     description: "Find expert career coaches to help you advance your career",
+//     type: "website",
+//   },
+// };
 
 const HomePage = () => {
   const [coaches, setCoaches] = useState<Coach[]>([]);
@@ -268,14 +269,16 @@ const HomePage = () => {
           )}
 
           <motion.div {...fadeInUp} className="text-center mt-12">
-            <Button
-              size="lg"
-              variant="outline"
-              className="border-blue-800 text-blue-800 hover:bg-blue-800 hover:text-white"
-            >
-              View All Coaches
-              <ArrowRight className="w-5 h-5 ml-2" />
-            </Button>
+            <Link href="/coaches">
+              <Button
+                size="lg"
+                variant="outline"
+                className="border-blue-800 text-blue-800 hover:bg-blue-800 hover:text-white"
+              >
+                View All Coaches
+                <ArrowRight className="w-5 h-5 ml-2" />
+              </Button>
+            </Link>
           </motion.div>
         </div>
       </section>
