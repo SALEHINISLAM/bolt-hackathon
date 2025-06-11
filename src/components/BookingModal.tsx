@@ -21,7 +21,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { toast } from 'sonner';
 import "react-datepicker/dist/react-datepicker.css";
 
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '');
+const stripePromise = loadStripe(process.env.STRIPE_PUBLISHABLE_KEY || '');
 
 interface Coach {
   _id: string;
