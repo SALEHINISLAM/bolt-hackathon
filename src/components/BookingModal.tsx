@@ -6,6 +6,7 @@ import { useSession } from 'next-auth/react';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import DatePicker from 'react-datepicker';
+import Image from 'next/image';
 import { 
   Calendar, 
   Clock, 
@@ -19,9 +20,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import "react-datepicker/dist/react-datepicker.css";
+import 'react-datepicker/dist/react-datepicker.css';
 
-const stripePromise = loadStripe(process.env.STRIPE_PUBLISHABLE_KEY || '');
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '');
 
 interface Coach {
   _id: string;
@@ -41,6 +42,23 @@ interface BookingFormProps {
   onClose: () => void;
 }
 
+interface BookingDetails {
+  id: string;
+  dateTime: string;
+  duration: number;
+  videoLink: string;
+  totalAmount: number;
+}
+
+// interface BookedSlot {
+//   dateTime: string;
+//   duration: number;
+// }
+
+interface BookingError {
+  message: string;
+}
+
 const BookingForm: React.FC<BookingFormProps> = ({ coach, onClose }) => {
   const { data: session } = useSession();
   const stripe = useStripe();
@@ -50,35 +68,28 @@ const BookingForm: React.FC<BookingFormProps> = ({ coach, onClose }) => {
   const [selectedDuration, setSelectedDuration] = useState<string>('60');
   const [isLoading, setIsLoading] = useState(false);
   const [bookingSuccess, setBookingSuccess] = useState(false);
-  const [bookingDetails, setBookingDetails] = useState<any>(null);
-  const [bookedSlots, setBookedSlots] = useState<any[]>([]);
+  const [bookingDetails, setBookingDetails] = useState<BookingDetails | null>(null);
 
   useEffect(() => {
+    const fetchBookedSlots = async () => {
+      try {
+        const response = await fetch(`/api/bookings?coachId=${coach._id}`);
+        if (response.ok) {
+          const data = await response.json();
+          // We don't need to store bookedSlots since we're not using them
+          console.log('Booked slots fetched:', data.bookedSlots);
+        }
+      } catch (error) {
+        console.error('Error fetching booked slots:', error);
+      }
+    };
+
     fetchBookedSlots();
   }, [coach._id]);
-
-  const fetchBookedSlots = async () => {
-    try {
-      const response = await fetch(`/api/bookings?coachId=${coach._id}`);
-      if (response.ok) {
-        const data = await response.json();
-        setBookedSlots(data.bookedSlots);
-      }
-    } catch (error) {
-      console.error('Error fetching booked slots:', error);
-    }
-  };
 
   const calculateTotal = () => {
     const duration = parseInt(selectedDuration);
     return (coach.hourlyRate * (duration / 60)).toFixed(2);
-  };
-
-  const isTimeSlotAvailable = (date: Date) => {
-    return !bookedSlots.some(slot => {
-      const slotDate = new Date(slot.dateTime);
-      return Math.abs(slotDate.getTime() - date.getTime()) < 60 * 60 * 1000; // 1 hour buffer
-    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -129,9 +140,10 @@ const BookingForm: React.FC<BookingFormProps> = ({ coach, onClose }) => {
       setBookingDetails(data.booking);
       setBookingSuccess(true);
       toast.success('Booking confirmed successfully!');
-    } catch (error:  any) {
-      console.error('Booking error:', error);
-      toast.error(error.message || 'Booking failed. Please try again.');
+    } catch (error) {
+      const bookingError = error as BookingError;
+      console.error('Booking error:', bookingError);
+      toast.error(bookingError.message || 'Booking failed. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -194,9 +206,11 @@ const BookingForm: React.FC<BookingFormProps> = ({ coach, onClose }) => {
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Coach Info */}
       <div className="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
-        <img
+        <Image
           src={coach.image}
           alt={coach.name}
+          width={48}
+          height={48}
           className="w-12 h-12 rounded-full object-cover"
         />
         <div>

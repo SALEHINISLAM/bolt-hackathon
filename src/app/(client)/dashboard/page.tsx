@@ -1,8 +1,19 @@
 import { Metadata } from 'next';
-import { getServerSession } from 'next-auth';
+import { getServerSession } from 'next-auth/next';
 import { redirect } from 'next/navigation';
 import { authOptions } from '@/lib/auth';
 import DashboardClient from '@/components/DashboardClient';
+
+// Define extended session type
+interface ExtendedSession {
+  user: {
+    id: string;
+    email: string;
+    name: string;
+    image?: string;
+    role: string;
+  };
+}
 
 export const metadata: Metadata = {
   title: 'Client Dashboard - Career Coaching Platform',
@@ -102,21 +113,23 @@ async function getRecommendedCoaches() {
 }
 
 export default async function ClientDashboardPage() {
-  const session = await getServerSession(authOptions);
+  const session = await getServerSession(authOptions) as ExtendedSession | null;
 
   if (!session?.user) {
     redirect('/auth/login?callbackUrl=/dashboard');
   }
 
+  const user = session.user;
+
   // Fetch data server-side
   const [bookingsData, recommendedCoaches] = await Promise.all([
-    getUserBookings(session.user.email!),
+    getUserBookings(user.email),
     getRecommendedCoaches(),
   ]);
 
   return (
     <DashboardClient
-      user={session.user}
+      user={user}
       initialBookingsData={bookingsData}
       initialRecommendedCoaches={recommendedCoaches}
     />

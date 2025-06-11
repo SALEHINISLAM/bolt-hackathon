@@ -23,6 +23,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import Image from 'next/image';
 
 interface NewsletterStats {
   totalSubscribers: number;
@@ -157,7 +158,7 @@ const NewsletterPageClient = () => {
     }
   ];
 
-  const handleSubscriptionSuccess = (email: string) => {
+  const handleSubscriptionSuccess = () => {
     setIsSubscribed(true);
     // Update stats optimistically
     setStats(prev => ({
@@ -298,7 +299,7 @@ const NewsletterPageClient = () => {
             animate="animate"
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
           >
-            {benefits.map((benefit, index) => (
+            {benefits.map((benefit) => (
               <motion.div
                 key={benefit.title}
                 variants={fadeInUp}
@@ -407,12 +408,14 @@ const NewsletterPageClient = () => {
                       ))}
                     </div>
                     <blockquote className="text-gray-700 mb-6 italic leading-relaxed">
-                      "{testimonial.quote}"
+                      &ldquo;{testimonial.quote}&rdquo;
                     </blockquote>
                     <div className="flex items-center">
-                      <img
+                      <Image
                         src={testimonial.avatar}
                         alt={testimonial.author}
+                        width={48}
+                        height={48}
                         className="w-12 h-12 rounded-full object-cover mr-4"
                       />
                       <div>
