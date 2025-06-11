@@ -1,8 +1,10 @@
 import Link from 'next/link';
-import { User, Mail, Phone, MapPin } from 'lucide-react';
+import { Mail, Phone, MapPin } from 'lucide-react';
 import { FaSquareXTwitter } from "react-icons/fa6";
 import { FaLinkedin } from "react-icons/fa6";
 import { FaSquareInstagram } from "react-icons/fa6";
+import logo from '/public/short_logo-removebg-preview.png';
+import Image from 'next/image';
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -59,10 +61,16 @@ const Footer = () => {
           {/* Company Info */}
           <div className="lg:col-span-2">
             <Link href="/" className="flex items-center space-x-2 mb-4">
-              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                <User className="w-5 h-5 text-white" />
+              <div className="w-16 h-16 p-2 bg-gray-200 rounded-lg flex items-center justify-center">
+                <Image
+                src={logo}
+                alt="Logo"
+                width={500}
+                height={500}
+                className='object-contain'
+              />
               </div>
-              <span className="text-xl font-bold">CareerCoach</span>
+              <span className="text-xl font-bold">Professional Update</span>
             </Link>
             <p className="text-gray-400 mb-6 leading-relaxed">
               Empowering professionals to achieve their career goals through personalized coaching and expert guidance.
@@ -109,7 +117,7 @@ const Footer = () => {
         <div className="border-t border-gray-800 mt-12 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <p className="text-gray-400 text-sm mb-4 md:mb-0">
-              © {currentYear} CareerCoach. All rights reserved.
+              © {currentYear} Professional Update. All rights reserved.
             </p>
             
             {/* Social Links */}

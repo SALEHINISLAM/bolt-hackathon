@@ -6,6 +6,8 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Menu, X, User, LogOut, Settings } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import Image from 'next/image';
+import logo from '/public/short_logo-removebg-preview.png';
 
 const Header = () => {
   const { data: session, status } = useSession();
@@ -18,7 +20,7 @@ const Header = () => {
     { name: 'Home', href: '/' },
     { name: 'Find a Coach', href: '/coaches' },
     { name: 'Corporate', href: '/corporate' },
-    { name: 'Newsletter', href: '#newsletter' },
+    { name: 'Newsletter', href: '/#newsletter' },
   ];
 
   const handleSignOut = () => {
@@ -45,10 +47,17 @@ const Header = () => {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-blue-800 rounded-lg flex items-center justify-center">
-              <User className="w-5 h-5 text-white" />
+            <div className="w-12 h-12 p-1 rounded-lg flex items-center justify-center">
+              {/* <User className="w-5 h-5 text-white" /> */}
+              <Image
+                src={logo}
+                alt="Logo"
+                width={500}
+                height={500}
+                className='object-contain'
+              />
             </div>
-            <span className="text-xl font-bold text-gray-900">CareerCoach</span>
+            <span className="text-xl font-bold text-gray-900 hidden xl:flex">Professional Update</span>
           </Link>
 
           {/* Desktop Navigation */}
