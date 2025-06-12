@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import BookingPageClient from '@/components/BookingPageClient';
 
-interface BookingPageProps {
+interface PageProps {
   params: {
     coachId: string;
   };
@@ -29,7 +29,7 @@ async function getCoachData(coachId: string) {
   }
 }
 
-export async function generateMetadata({ params }: BookingPageProps): Promise<Metadata> {
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const data = await getCoachData(params.coachId);
   
   if (!data) {
@@ -48,7 +48,7 @@ export async function generateMetadata({ params }: BookingPageProps): Promise<Me
   };
 }
 
-export default async function BookingPage({ params }: BookingPageProps) {
+export default async function BookingPage({ params }: PageProps) {
   const data = await getCoachData(params.coachId);
 
   if (!data) {
