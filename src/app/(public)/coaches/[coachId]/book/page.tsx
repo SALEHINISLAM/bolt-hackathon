@@ -22,12 +22,12 @@ async function getCoachData(coachId: string) {
 
 interface BookingPageProps {
   params: { coachId: string };
-  searchParams: { [key: string]: string | string[] | undefined };
+  searchParams?: { [key: string]: string | string[] | undefined };
 }
 
 interface LoosePageProps {
   params: Promise<{ coachId: string }> | undefined;
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }> | undefined;
+  searchParams?: { [key: string]: string | string[] | undefined };
 }
 
 export async function generateMetadata(
