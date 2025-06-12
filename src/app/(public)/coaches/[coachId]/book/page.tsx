@@ -27,7 +27,7 @@ interface BookingPageProps {
 
 interface LoosePageProps {
   params: Promise<{ coachId: string }> | undefined;
-  searchParams?: { [key: string]: string | string[] | undefined };
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }> | undefined;
 }
 
 export async function generateMetadata(
