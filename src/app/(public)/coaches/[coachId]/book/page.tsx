@@ -21,11 +21,12 @@ async function getCoachData(coachId: string) {
   }
 }
 
-// ✅ DO NOT use `PageParams` or `PageProps` types
+// ✅ Correct typing: do not reuse or import PageProps
 export async function generateMetadata(
-  { params }: { params: { coachId: string } }
+  props: { params: { coachId: string } }
 ): Promise<Metadata> {
-  const data = await getCoachData(params.coachId);
+  const coachId = props.params.coachId;
+  const data = await getCoachData(coachId);
 
   if (!data) {
     return {
@@ -43,9 +44,12 @@ export async function generateMetadata(
   };
 }
 
-export default async function BookingPage(
-  { params }: { params: { coachId: string } }
-) {
+// ✅ No custom type; just inline destructure and type
+export default async function Page({
+  params,
+}: {
+  params: { coachId: string };
+}) {
   const data = await getCoachData(params.coachId);
 
   if (!data) {
@@ -55,4 +59,5 @@ export default async function BookingPage(
   return <BookingPageClient data={data} coachId={params.coachId} />;
 }
 
+// ✅ Static revalidation
 export const revalidate = 3600;
