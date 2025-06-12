@@ -5,6 +5,7 @@ import { Calendar, Clock, Video, CheckCircle, AlertCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import Image from 'next/image';
 
 interface Booking {
   _id: string;
@@ -134,10 +135,12 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings, loading = false }
               <div className="flex flex-col md:flex-row md:items-center justify-between space-y-3 md:space-y-0">
                 {/* Left side - Date, Time, Coach */}
                 <div className="flex items-center space-x-4">
-                  <img
+                  <Image
                     src={booking.coach.image}
                     alt={booking.coach.name}
                     className="w-12 h-12 rounded-full object-cover"
+                    width={48}
+                    height={48}
                   />
                   <div>
                     <h4 className="font-semibold text-gray-900">{booking.coach.name}</h4>

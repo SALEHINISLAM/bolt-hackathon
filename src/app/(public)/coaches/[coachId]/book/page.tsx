@@ -1,14 +1,6 @@
-// app/(public)/coaches/[coachId]/book/page.tsx
-
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import BookingPageClient from '@/components/BookingPageClient';
-
-type PageParams = {
-  params: {
-    coachId: string;
-  };
-};
 
 async function getCoachData(coachId: string) {
   try {
@@ -18,9 +10,7 @@ async function getCoachData(coachId: string) {
     });
 
     if (!response.ok) {
-      if (response.status === 404) {
-        return null;
-      }
+      if (response.status === 404) return null;
       throw new Error('Failed to fetch coach data');
     }
 
@@ -31,9 +21,9 @@ async function getCoachData(coachId: string) {
   }
 }
 
-// ✅ Correct way to type `generateMetadata`
+// ✅ DO NOT use `PageParams` or `PageProps` types
 export async function generateMetadata(
-  { params }: PageParams
+  { params }: { params: { coachId: string } }
 ): Promise<Metadata> {
   const data = await getCoachData(params.coachId);
 
@@ -53,9 +43,8 @@ export async function generateMetadata(
   };
 }
 
-// ✅ Correct typing of the actual page component
 export default async function BookingPage(
-  { params }: PageParams
+  { params }: { params: { coachId: string } }
 ) {
   const data = await getCoachData(params.coachId);
 

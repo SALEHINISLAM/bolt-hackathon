@@ -19,6 +19,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import Image from 'next/image';
 
 interface Coach {
   _id: string;
@@ -105,10 +106,12 @@ const CoachProfileClient: React.FC<CoachProfileClientProps> = ({ data, coachId }
             {/* Coach Image */}
             <div className="lg:col-span-1">
               <div className="relative">
-                <img
+                <Image
                   src={coach.image}
                   alt={coach.name}
                   className="w-full max-w-sm mx-auto rounded-2xl shadow-2xl object-cover aspect-square"
+                  width={500}
+                  height={500}
                 />
                 <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1 flex items-center space-x-1">
                   <Star className="w-4 h-4 text-yellow-500 fill-current" />

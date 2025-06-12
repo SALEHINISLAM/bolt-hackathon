@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Star, CheckCircle, Calendar } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import Image from 'next/image';
 
 interface ReviewCardProps {
   review: {
@@ -43,10 +44,12 @@ const ReviewCard: React.FC<ReviewCardProps> = ({ review, index = 0 }) => {
               <div className="flex items-center space-x-3">
                 <div className="relative">
                   {review.userAvatar ? (
-                    <img
+                    <Image
                       src={review.userAvatar}
                       alt={review.userName}
                       className="w-12 h-12 rounded-full object-cover"
+                      width={48}
+                      height={48}
                     />
                   ) : (
                     <div className="w-12 h-12 bg-blue-800 rounded-full flex items-center justify-center text-white font-semibold">
