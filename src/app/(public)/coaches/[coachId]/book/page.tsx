@@ -25,10 +25,10 @@ interface BookingPageProps {
   searchParams?: { [key: string]: string | string[] | undefined };
 }
 
-// Match Next.js's exact expectation
+// Match Next.js's exact expectation for both params and searchParams
 interface LoosePageProps {
   params: Promise<{ coachId: string }> | undefined;
-  searchParams?: { [key: string]: string | string[] | undefined };
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }> | undefined;
 }
 
 export async function generateMetadata(
@@ -52,10 +52,14 @@ export async function generateMetadata(
   };
 }
 
-const BookingPage: NextPage<LoosePageProps> = async ({ params }) => {
-  // Handle undefined or Promise params
+const BookingPage: NextPage<LoosePageProps> = async ({ params, searchParams }) => {
+  // Resolve params if it's a Promise, handle undefined
   const typedParams = params ? await params : { coachId: '' };
-  console.log('params:', typedParams); // Debug log
+  // Resolve searchParams if it's a Promise, handle undefined
+  const typedSearchParams = searchParams ? await searchParams : {};
+
+  console.log('params:', typedParams, 'searchParams:', typedSearchParams); // Debug log
+
   if (!typedParams.coachId) {
     notFound();
   }
