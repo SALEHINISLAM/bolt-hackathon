@@ -1,8 +1,12 @@
-// app/(public)/coaches/[coachId]/book/page.tsx
-
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import BookingPageClient from '@/components/BookingPageClient';
+
+type PageParams = {
+  params: {
+    coachId: string;
+  };
+};
 
 async function getCoachData(coachId: string) {
   try {
@@ -22,9 +26,9 @@ async function getCoachData(coachId: string) {
   }
 }
 
-// ✅ DO NOT use PageProps or any imported constraint
+// ✅ Metadata function using inline type (or reuse PageParams)
 export async function generateMetadata(
-  { params }: { params: { coachId: string } }
+  { params }: PageParams
 ): Promise<Metadata> {
   const data = await getCoachData(params.coachId);
 
@@ -40,13 +44,12 @@ export async function generateMetadata(
   return {
     title: `Book ${coach.name} - Career Coaching Session`,
     description: `Book a personalized coaching session with ${coach.name}`,
+    keywords: coach.expertise?.join(', ') ?? '',
   };
 }
 
-// ✅ Correctly typed route handler
-export default async function BookingPage(
-  { params }: { params: { coachId: string } }
-) {
+// ✅ Page route using the same correct type
+export default async function BookingPage({ params }: PageParams) {
   const data = await getCoachData(params.coachId);
 
   if (!data) {
@@ -56,4 +59,5 @@ export default async function BookingPage(
   return <BookingPageClient data={data} coachId={params.coachId} />;
 }
 
+// ✅ ISR revalidation
 export const revalidate = 3600;
