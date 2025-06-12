@@ -20,7 +20,6 @@ async function getCoachData(coachId: string) {
   }
 }
 
-// Use NextPage for type safety
 interface BookingPageProps {
   params: { coachId: string };
   searchParams?: { [key: string]: string | string[] | undefined };
@@ -48,6 +47,7 @@ export async function generateMetadata(
 }
 
 const BookingPage: NextPage<BookingPageProps> = async ({ params }) => {
+  console.log('params:', params); // Debug log to inspect params
   const data = await getCoachData(params.coachId);
 
   if (!data) {
