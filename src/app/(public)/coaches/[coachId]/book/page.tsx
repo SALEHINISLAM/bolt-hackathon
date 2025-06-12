@@ -2,17 +2,11 @@ import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import BookingPageClient from '@/components/BookingPageClient';
 
-interface PageProps {
-  params: {
-    coachId: string;
-  };
-}
-
 async function getCoachData(coachId: string) {
   try {
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
     const response = await fetch(`${baseUrl}/api/coaches/${coachId}`, {
-      next: { revalidate: 3600 }, // Revalidate every hour
+      next: { revalidate: 3600 },
     });
 
     if (!response.ok) {
@@ -29,9 +23,14 @@ async function getCoachData(coachId: string) {
   }
 }
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+// ✅ Use implicit PageProps type
+export async function generateMetadata({
+  params,
+}: {
+  params: { coachId: string };
+}): Promise<Metadata> {
   const data = await getCoachData(params.coachId);
-  
+
   if (!data) {
     return {
       title: 'Coach Not Found - Career Coaching Platform',
@@ -40,7 +39,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 
   const { coach } = data;
-  
+
   return {
     title: `Book ${coach.name} - Career Coaching Session`,
     description: `Book a personalized career coaching session with ${coach.name}. Expert guidance for your professional development.`,
@@ -48,7 +47,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
-export default async function BookingPage({ params }: PageProps) {
+// ✅ Same here: destructure params inline
+export default async function BookingPage({
+  params,
+}: {
+  params: { coachId: string };
+}) {
   const data = await getCoachData(params.coachId);
 
   if (!data) {
@@ -58,4 +62,4 @@ export default async function BookingPage({ params }: PageProps) {
   return <BookingPageClient data={data} coachId={params.coachId} />;
 }
 
-export const revalidate = 3600; // Revalidate every hour
+export const revalidate = 3600;
