@@ -2,6 +2,17 @@ import { NextRequest, NextResponse } from 'next/server';
 import connectToDatabase from '@/lib/ConnectDB';
 import Coach from '@/lib/models/Coach';
 
+interface CoachQuery {
+  expertise?: { $in: RegExp[] };
+  hourlyRate?: { $gte?: number; $lte?: number };
+  rating?: { $gte: number };
+  $or?: Array<{
+    name?: { $regex: string; $options: string };
+    bio?: { $regex: string; $options: string };
+    expertise?: { $in: RegExp[] };
+  }>;
+}
+
 export async function GET(request: NextRequest) {
   try {
     const db = await connectToDatabase();
@@ -56,7 +67,7 @@ export async function GET(request: NextRequest) {
     const search = searchParams.get('search');
 
     // Build query object
-    const query: any = {};
+    const query: CoachQuery = {};
 
     if (expertise && expertise !== 'all') {
       query.expertise = { $in: [new RegExp(expertise, 'i')] };

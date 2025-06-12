@@ -124,7 +124,7 @@ export default function SignUpPage() {
         toast.success('Welcome! You are now signed in.');
         router.push('/dashboard');
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Sign up error:', error);
       setErrors({ general: 'An unexpected error occurred' });
       toast.error('Sign up failed. Please try again.');

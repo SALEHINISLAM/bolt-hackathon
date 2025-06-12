@@ -3,6 +3,15 @@ import connectToDatabase from '@/lib/ConnectDB';
 import CorporateInquiry from '@/lib/models/CorporateInquiry';
 import { sendCorporateInquiryNotification } from '@/lib/email';
 
+interface CorporateInquiryQuery {
+  status?: string;
+  region?: string;
+  // Add other potential filter fields here
+  // Example:
+  // companyName?: { $regex: RegExp };
+  // createdAt?: { $gte?: Date; $lte?: Date };
+}
+
 export async function POST(request: NextRequest) {
   try {
     const {
@@ -193,7 +202,7 @@ export async function GET(request: NextRequest) {
       }
 
       // Build query
-      const query: any = {};
+      const query: CorporateInquiryQuery = {};
       if (status) query.status = status;
       if (region) query.region = region;
 

@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
         user: userResponse,
       }, { status: 201 });
 
-    } catch (dbError: any) {
+    } catch (dbError: unknown) {
       console.warn('Database operation failed:', dbError);
       
       // Return success even if database fails (graceful degradation)

@@ -1,10 +1,11 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Star, Clock, MapPin } from 'lucide-react';
+import { Star, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import Image from 'next/image';
 
 interface CoachCardProps {
   coach: {
@@ -32,10 +33,12 @@ const CoachCard: React.FC<CoachCardProps> = ({ coach, index = 0 }) => {
       <Card className="h-full flex flex-col hover:shadow-lg transition-shadow duration-300 border-0 shadow-md">
         <CardHeader className="p-0">
           <div className="relative h-48 w-full overflow-hidden rounded-t-lg">
-            <img
+            <Image
               src={coach.image}
               alt={coach.name}
               className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+              width={1920}
+              height={1080}
             />
             <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm rounded-full px-2 py-1 flex items-center space-x-1">
               <Star className="w-4 h-4 text-yellow-500 fill-current" />

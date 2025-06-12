@@ -94,6 +94,7 @@ const NewsletterForm: React.FC<NewsletterFormProps> = ({
         toast.error(data.error || 'Something went wrong. Please try again.');
       }
     } catch (error) {
+      console.log(error);
       const errorMessage = 'Network error. Please check your connection and try again.';
       setErrors({ general: errorMessage });
       toast.error(errorMessage);

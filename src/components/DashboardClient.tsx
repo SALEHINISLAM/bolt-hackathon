@@ -10,6 +10,7 @@ import ProgressTracker from '@/components/ProgressTracker';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Link from 'next/link';
+import Image from 'next/image';
 
 interface DashboardUser {
   id: string;
@@ -186,7 +187,7 @@ const DashboardClient: React.FC<DashboardClientProps> = ({
             animate="animate"
             className="grid grid-cols-1 md:grid-cols-3 gap-6"
           >
-            {quickStats.map((stat, index) => (
+            {quickStats.map((stat) => (
               <motion.div
                 key={stat.title}
                 variants={fadeInUp}
@@ -267,10 +268,12 @@ const DashboardClient: React.FC<DashboardClientProps> = ({
                           >
                             <Link href={`/coaches/${coach._id}`}>
                               <div className="flex items-center space-x-3">
-                                <img
+                                <Image
                                   src={coach.image}
                                   alt={coach.name}
                                   className="w-12 h-12 rounded-full object-cover"
+                                  width={48}
+                                  height={48}
                                 />
                                 <div className="flex-1 min-w-0">
                                   <h4 className="font-semibold text-gray-900 truncate">

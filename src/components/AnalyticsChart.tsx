@@ -10,6 +10,7 @@ import {
   Title,
   Tooltip,
   Legend,
+  TooltipItem,
 } from 'chart.js';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TrendingUp } from 'lucide-react';
@@ -77,7 +78,7 @@ const AnalyticsChart: React.FC<AnalyticsChartProps> = ({
           padding: 20,
           font: {
             size: 12,
-            weight: '500' as const,
+            weight: 500,
           },
         },
       },
@@ -90,10 +91,10 @@ const AnalyticsChart: React.FC<AnalyticsChartProps> = ({
         cornerRadius: 8,
         displayColors: true,
         callbacks: {
-          title: function(context: any) {
+          title: function(context: TooltipItem<'bar'>[]) {
             return `${context[0].label} 2024`;
           },
-          label: function(context: any) {
+          label: function(context: TooltipItem<'bar'>) {
             const label = context.dataset.label || '';
             const value = context.parsed.y;
             return `${label}: ${value}`;
@@ -127,7 +128,7 @@ const AnalyticsChart: React.FC<AnalyticsChartProps> = ({
           color: '#6B7280',
           font: {
             size: 11,
-            weight: '500' as const,
+            weight: 500,
           },
         },
         border: {

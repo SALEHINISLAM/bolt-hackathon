@@ -41,15 +41,18 @@ interface MongoBookingResult {
 }
 
 // Type guard to validate booking structure
-function isValidBooking(booking: any): booking is BookingDocument {
-  return booking &&
-         booking._id &&
-         booking.coachId &&
-         booking.dateTime &&
-         typeof booking.duration === 'number' &&
-         typeof booking.status === 'string' &&
-         typeof booking.totalAmount === 'number' &&
-         typeof booking.userId === 'string';
+function isValidBooking(booking: MongoBookingResult): booking is BookingDocument {
+
+  return (
+    booking._id !== undefined &&
+    booking.coachId !== undefined &&
+    booking.dateTime !== undefined &&
+    typeof booking.duration === 'number' &&
+    typeof booking.status === 'string' &&
+    ['pending', 'confirmed', 'cancelled', 'completed'].includes(booking.status) &&
+    typeof booking.totalAmount === 'number' &&
+    typeof booking.userId === 'string'
+  );
 }
 
 export async function GET() {

@@ -53,6 +53,7 @@ async function connectToDatabase(): Promise<typeof mongoose | null> {
   try {
     cached!.conn = await cached!.promise;
   } catch (e) {
+    console.log(e);
     cached!.promise = null;
     cached!.conn = null;
   }

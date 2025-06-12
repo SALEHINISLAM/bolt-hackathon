@@ -108,7 +108,7 @@ export async function GET() {
       }
 
       // Ensure we have a valid coach with _id
-      const coach = coachQuery as { _id: mongoose.Types.ObjectId; [key: string]: any };
+      const coach = coachQuery as { _id: mongoose.Types.ObjectId; [key: string]: string | boolean | unknown };
       
       if (!coach._id) {
         return NextResponse.json(
