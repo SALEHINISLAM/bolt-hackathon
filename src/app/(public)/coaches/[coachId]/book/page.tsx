@@ -1,14 +1,6 @@
-import { Metadata } from 'next';
+import { Metadata, NextPage } from 'next';
 import { notFound } from 'next/navigation';
 import BookingPageClient from '@/components/BookingPageClient';
-
-// Define the expected props type for a dynamic route
-interface PageProps {
-  params: {
-    coachId: string;
-  };
-  searchParams?: { [key: string]: string | string[] | undefined };
-}
 
 async function getCoachData(coachId: string) {
   try {
@@ -28,9 +20,14 @@ async function getCoachData(coachId: string) {
   }
 }
 
-// Metadata function
+// Use NextPage for type safety
+interface BookingPageProps {
+  params: { coachId: string };
+  searchParams?: { [key: string]: string | string[] | undefined };
+}
+
 export async function generateMetadata(
-  { params }: PageProps
+  { params }: BookingPageProps
 ): Promise<Metadata> {
   const data = await getCoachData(params.coachId);
 
@@ -50,8 +47,7 @@ export async function generateMetadata(
   };
 }
 
-// Page component
-export default async function BookingPage({ params }: PageProps) {
+const BookingPage: NextPage<BookingPageProps> = async ({ params }) => {
   const data = await getCoachData(params.coachId);
 
   if (!data) {
@@ -59,7 +55,8 @@ export default async function BookingPage({ params }: PageProps) {
   }
 
   return <BookingPageClient data={data} coachId={params.coachId} />;
-}
+};
 
-// ISR revalidation
+export default BookingPage;
+
 export const revalidate = 3600;
