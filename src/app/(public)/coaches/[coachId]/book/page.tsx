@@ -22,10 +22,10 @@ async function getCoachData(coachId: string) {
 
 interface BookingPageProps {
   params: { coachId: string };
-  searchParams?: { [key: string]: string | string[] | undefined };
+  searchParams: { [key: string]: string | string[] | undefined };
 }
 
-// Match Next.js's exact expectation for both params and searchParams
+// Match Next.js's incorrect type expectations
 interface LoosePageProps {
   params: Promise<{ coachId: string }> | undefined;
   searchParams: Promise<{ [key: string]: string | string[] | undefined }> | undefined;
@@ -53,9 +53,8 @@ export async function generateMetadata(
 }
 
 const BookingPage: NextPage<LoosePageProps> = async ({ params, searchParams }) => {
-  // Resolve params if it's a Promise, handle undefined
+  // Resolve params and searchParams
   const typedParams = params ? await params : { coachId: '' };
-  // Resolve searchParams if it's a Promise, handle undefined
   const typedSearchParams = searchParams ? await searchParams : {};
 
   console.log('params:', typedParams, 'searchParams:', typedSearchParams); // Debug log
