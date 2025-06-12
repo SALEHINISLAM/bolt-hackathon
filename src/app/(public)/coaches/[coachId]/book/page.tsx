@@ -1,6 +1,14 @@
+// app/(public)/coaches/[coachId]/book/page.tsx
+
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import BookingPageClient from '@/components/BookingPageClient';
+
+type PageParams = {
+  params: {
+    coachId: string;
+  };
+};
 
 async function getCoachData(coachId: string) {
   try {
@@ -23,12 +31,10 @@ async function getCoachData(coachId: string) {
   }
 }
 
-// ✅ Use implicit PageProps type
-export async function generateMetadata({
-  params,
-}: {
-  params: { coachId: string };
-}): Promise<Metadata> {
+// ✅ Correct way to type `generateMetadata`
+export async function generateMetadata(
+  { params }: PageParams
+): Promise<Metadata> {
   const data = await getCoachData(params.coachId);
 
   if (!data) {
@@ -47,12 +53,10 @@ export async function generateMetadata({
   };
 }
 
-// ✅ Same here: destructure params inline
-export default async function BookingPage({
-  params,
-}: {
-  params: { coachId: string };
-}) {
+// ✅ Correct typing of the actual page component
+export default async function BookingPage(
+  { params }: PageParams
+) {
   const data = await getCoachData(params.coachId);
 
   if (!data) {
