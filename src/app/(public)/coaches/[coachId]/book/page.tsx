@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import BookingPageClient from '@/components/BookingPageClient';
 
+// Data fetching function
 async function getCoachData(coachId: string) {
   try {
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
@@ -20,14 +21,12 @@ async function getCoachData(coachId: string) {
   }
 }
 
-interface PageProps {
+// Metadata generation
+export async function generateMetadata({
+  params,
+}: {
   params: { coachId: string };
-  searchParams?: { [key: string]: string | string[] | undefined };
-}
-
-export async function generateMetadata(
-  { params }: PageProps
-): Promise<Metadata> {
+}): Promise<Metadata> {
   const data = await getCoachData(params.coachId);
 
   if (!data) {
@@ -46,7 +45,12 @@ export async function generateMetadata(
   };
 }
 
-export default async function BookingPage({ params }: PageProps) {
+// Main page component
+export default async function BookingPage({
+  params,
+}: {
+  params: { coachId: string };
+}) {
   const data = await getCoachData(params.coachId);
 
   if (!data) {
