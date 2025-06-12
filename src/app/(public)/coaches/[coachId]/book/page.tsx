@@ -1,4 +1,4 @@
-import { Metadata, NextPage } from 'next';
+import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import BookingPageClient from '@/components/BookingPageClient';
 
@@ -20,18 +20,13 @@ async function getCoachData(coachId: string) {
   }
 }
 
-interface BookingPageProps {
+interface PageProps {
   params: { coachId: string };
   searchParams?: { [key: string]: string | string[] | undefined };
 }
 
-interface LoosePageProps {
-  params: Promise<{ coachId: string }> | undefined;
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }> | undefined;
-}
-
 export async function generateMetadata(
-  { params }: BookingPageProps
+  { params }: PageProps
 ): Promise<Metadata> {
   const data = await getCoachData(params.coachId);
 
@@ -51,23 +46,14 @@ export async function generateMetadata(
   };
 }
 
-const BookingPage: NextPage<LoosePageProps> = async ({ params }) => {
-  const typedParams = params ? await params : { coachId: '' };
-  console.log('params:', typedParams); // Debug log
-
-  if (!typedParams.coachId) {
-    notFound();
-  }
-
-  const data = await getCoachData(typedParams.coachId);
+export default async function BookingPage({ params }: PageProps) {
+  const data = await getCoachData(params.coachId);
 
   if (!data) {
     notFound();
   }
 
-  return <BookingPageClient data={data} coachId={typedParams.coachId} />;
-};
-
-export default BookingPage;
+  return <BookingPageClient data={data} coachId={params.coachId} />;
+}
 
 export const revalidate = 3600;
