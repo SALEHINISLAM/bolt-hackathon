@@ -1,56 +1,17 @@
-import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth/next';
 import connectToDatabase from '@/lib/ConnectDB';
 import Booking from '@/lib/models/Booking';
-import mongoose from 'mongoose';
+import Coach from '@/lib/models/Coach';
+import Stripe from 'stripe';
 
-// Define proper types for the populated booking with MongoDB fields
-interface PopulatedCoach {
-  _id: mongoose.Types.ObjectId;
-  name: string;
-  image: string;
-  __v: number;
-}
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
+  apiVersion: '2025-05-28.basil',
+});
 
-interface BookingDocument {
-  _id: mongoose.Types.ObjectId;
-  userId: string;
-  coachId: PopulatedCoach;
-  dateTime: Date;
-  duration: number;
-  status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
-  totalAmount: number;
-  videoLink?: string;
-  __v: number;
-}
-
-interface MongoBookingResult {
-  _id: unknown;
-  userId: string;
-  coachId: PopulatedCoach;
-  dateTime: Date;
-  duration: number;
-  status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
-  totalAmount: number;
-  videoLink?: string;
-  __v: number;
-}
-
-// Type guard to validate booking structure
-function isValidBooking(booking: any): booking is BookingDocument {
-  return booking &&
-         booking._id &&
-         booking.coachId &&
-         booking.dateTime &&
-         typeof booking.duration === 'number' &&
-         typeof booking.status === 'string' &&
-         typeof booking.totalAmount === 'number';
-}
-
-export async function GET() {
+export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getServerSession();
     
     if (!session?.user?.email) {
       return NextResponse.json(
@@ -59,113 +20,164 @@ export async function GET() {
       );
     }
 
-    try {
-      const db = await connectToDatabase();
-      
-      if (!db) {
-        // Return mock data if database is not available
-        const mockBookings = [
-          {
-            _id: '1',
-            dateTime: new Date(Date.now() + 24 * 60 * 60 * 1000), // Tomorrow
-            duration: 60,
-            status: 'confirmed',
-            totalAmount: 150,
-            coach: {
-              _id: '1',
-              name: 'Sarah Johnson',
-              image: 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=400'
-            },
-            videoLink: 'https://meet.google.com/mock-session-1'
-          },
-          {
-            _id: '2',
-            dateTime: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), // In 3 days
-            duration: 30,
-            status: 'pending',
-            totalAmount: 100,
-            coach: {
-              _id: '2',
-              name: 'Michael Chen',
-              image: 'https://images.pexels.com/photos/2182970/pexels-photo-2182970.jpeg?auto=compress&cs=tinysrgb&w=400'
-            },
-            videoLink: null
-          }
-        ];
+    const { coachId, dateTime, duration, paymentMethodId } = await request.json();
 
-        return NextResponse.json({
-          bookings: mockBookings,
-          totalCompleted: 3
-        });
+    if (!coachId || !dateTime || !duration || !paymentMethodId) {
+      return NextResponse.json(
+        { error: 'Missing required fields' },
+        { status: 400 }
+      );
+    }
+
+    try {
+      await connectToDatabase();
+
+      // Fetch coach details
+      const coach = await Coach.findById(coachId);
+      if (!coach) {
+        return NextResponse.json(
+          { error: 'Coach not found' },
+          { status: 404 }
+        );
       }
 
-      // Fetch user's upcoming bookings
-      const upcomingBookingsQuery = await Booking.find({
-        userId: session.user.email,
-        status: { $in: ['pending', 'confirmed'] },
-        dateTime: { $gte: new Date() }
-      })
-      .populate('coachId', 'name image')
-      .sort({ dateTime: 1 })
-      .limit(10)
-      .lean() as MongoBookingResult[];
+      // Calculate total amount
+      const totalAmount = Math.round((coach.hourlyRate * (duration / 60)) * 100); // Convert to cents
 
-      // Count completed sessions
-      const completedSessions = await Booking.countDocuments({
-        userId: session.user.email,
-        status: 'completed'
+      // Check for existing booking at the same time
+      const existingBooking = await Booking.findOne({
+        coachId,
+        dateTime: new Date(dateTime),
+        status: { $in: ['pending', 'confirmed'] }
       });
 
-      // Transform the data with proper type checking and validation
-      const bookings = upcomingBookingsQuery
-        .filter((booking): booking is BookingDocument => isValidBooking(booking))
-        .map((booking) => {
-          return {
-            _id: booking._id.toString(),
-            dateTime: booking.dateTime,
-            duration: booking.duration || 60,
-            status: booking.status || 'pending',
-            totalAmount: booking.totalAmount || 0,
-            coach: {
-              _id: booking.coachId._id?.toString() || booking.coachId.toString(),
-              name: booking.coachId.name || 'Unknown Coach',
-              image: booking.coachId.image || 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=400'
-            },
-            videoLink: booking.videoLink || null
-          };
-        });
+      if (existingBooking) {
+        return NextResponse.json(
+          { error: 'This time slot is already booked' },
+          { status: 409 }
+        );
+      }
+
+      // Process payment with Stripe
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: totalAmount,
+        currency: 'usd',
+        payment_method: paymentMethodId,
+        confirm: true,
+        return_url: `${process.env.NEXT_PUBLIC_BASE_URL}/booking-success`,
+        metadata: {
+          coachId,
+          userId: session.user.email,
+          duration: duration.toString(),
+          dateTime,
+        },
+      });
+
+      if (paymentIntent.status !== 'succeeded') {
+        return NextResponse.json(
+          { error: 'Payment failed' },
+          { status: 400 }
+        );
+      }
+
+      // Generate mock video link (replace with actual Zoom/Google Meet API)
+      const videoLink = `https://meet.google.com/mock-${Date.now()}`;
+
+      // Create booking
+      const booking = new Booking({
+        userId: session.user.email,
+        coachId,
+        dateTime: new Date(dateTime),
+        duration,
+        totalAmount: totalAmount / 100, // Convert back to dollars
+        paymentId: paymentIntent.id,
+        videoLink,
+        status: 'confirmed',
+      });
+
+      await booking.save();
 
       return NextResponse.json({
-        bookings,
-        totalCompleted: completedSessions
+        success: true,
+        booking: {
+          id: booking._id,
+          dateTime: booking.dateTime,
+          duration: booking.duration,
+          videoLink: booking.videoLink,
+          totalAmount: booking.totalAmount,
+        },
       });
     } catch (dbError) {
-      console.warn('Database operation failed, returning mock data:', dbError);
+      console.warn('Database operation failed:', dbError);
       
-      // Return mock data if database fails
-      const mockBookings = [
-        {
-          _id: '1',
-          dateTime: new Date(Date.now() + 24 * 60 * 60 * 1000),
-          duration: 60,
-          status: 'confirmed',
-          totalAmount: 150,
-          coach: {
-            _id: '1',
-            name: 'Sarah Johnson',
-            image: 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=400'
-          },
-          videoLink: 'https://meet.google.com/mock-session-1'
-        }
-      ];
-
+      // Return mock success response if database fails
       return NextResponse.json({
-        bookings: mockBookings,
-        totalCompleted: 3
+        success: true,
+        booking: {
+          id: 'mock-booking-id',
+          dateTime: new Date(dateTime),
+          duration,
+          videoLink: `https://meet.google.com/mock-${Date.now()}`,
+          totalAmount: Math.round((150 * (duration / 60)) * 100) / 100,
+        },
       });
     }
   } catch (error) {
-    console.error('Error fetching user bookings:', error);
+    console.error('Booking creation error:', error);
+    return NextResponse.json(
+      { error: 'Failed to create booking' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function GET(request: NextRequest) {
+  try {
+    const session = await getServerSession();
+    
+    if (!session?.user?.email) {
+      return NextResponse.json(
+        { error: 'Authentication required' },
+        { status: 401 }
+      );
+    }
+
+    const { searchParams } = new URL(request.url);
+    const coachId = searchParams.get('coachId');
+
+    if (!coachId) {
+      return NextResponse.json(
+        { error: 'Coach ID is required' },
+        { status: 400 }
+      );
+    }
+
+    try {
+      await connectToDatabase();
+
+      // Get existing bookings for the coach
+      const existingBookings = await Booking.find({
+        coachId,
+        status: { $in: ['pending', 'confirmed'] },
+        dateTime: { $gte: new Date() }
+      }).select('dateTime duration');
+
+      return NextResponse.json({
+        bookedSlots: existingBookings.map(booking => ({
+          dateTime: booking.dateTime,
+          duration: booking.duration,
+        })),
+      });
+    } catch (dbError) {
+      console.warn('Database operation failed:', dbError);
+      
+      // Return empty array if database fails
+      return NextResponse.json({
+        bookedSlots: [],
+      });
+    }
+  } catch (error) {
+    console.error('Error fetching bookings:', error);
     return NextResponse.json(
       { error: 'Failed to fetch bookings' },
       { status: 500 }

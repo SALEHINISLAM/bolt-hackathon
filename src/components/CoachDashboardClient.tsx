@@ -31,6 +31,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
+import Image from 'next/image';
 
 ChartJS.register(
   CategoryScale,
@@ -343,10 +344,12 @@ const CoachDashboardClient: React.FC<CoachDashboardClientProps> = ({
             </div>
             
             <div className="flex items-center space-x-4">
-              <img
+              <Image
                 src={profileData.image}
                 alt={profileData.name}
                 className="w-16 h-16 rounded-full object-cover border-4 border-white/20"
+                width={64}
+                height={64}
               />
               <div className="text-right">
                 <div className="flex items-center space-x-1 mb-1">

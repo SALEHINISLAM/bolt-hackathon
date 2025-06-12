@@ -21,6 +21,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import { Session } from 'next-auth';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -41,7 +42,7 @@ export default function LoginPage() {
     getSession().then((session) => {
       if (session?.user) {
         // Role-based redirect
-        const role = (session.user as any).role;
+        const role = (session.user)?.role;
         switch (role) {
           case 'admin':
             router.push('/admin/dashboard');
@@ -117,8 +118,8 @@ export default function LoginPage() {
         toast.success('Signed in successfully!');
         
         // Get session to determine role-based redirect
-        const session = await getSession();
-        const role = (session?.user as any)?.role;
+        const session = await getSession() as Session | null;
+        const role = (session?.user)?.role;
         
         let redirectUrl = callbackUrl;
         if (callbackUrl === '/') {
@@ -136,7 +137,7 @@ export default function LoginPage() {
         
         router.push(redirectUrl);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Sign in error:', error);
       setErrors({ general: 'An unexpected error occurred' });
       toast.error('Sign in failed. Please try again.');

@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
+import Image from 'next/image';
 
 interface CoachProfile {
   _id: string;
@@ -58,7 +59,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
     'Portuguese', 'Mandarin', 'Japanese', 'Korean', 'Arabic'
   ];
 
-  const handleInputChange = (field: string, value: any) => {
+  const handleInputChange = (field: string, value: string | number | string[]) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
@@ -384,10 +385,12 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
           <div className="space-y-6">
             {/* Profile Overview */}
             <div className="flex items-start space-x-4">
-              <img
+              <Image
                 src={profile.image}
                 alt={profile.name}
                 className="w-20 h-20 rounded-full object-cover"
+                width={80}
+                height={80}
               />
               <div className="flex-1">
                 <h3 className="text-xl font-semibold text-gray-900">{profile.name}</h3>

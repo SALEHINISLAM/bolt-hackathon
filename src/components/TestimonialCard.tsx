@@ -1,9 +1,10 @@
-'use client';
+"use client";
 
-import { motion } from 'framer-motion';
-import { Star, Quote } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { motion } from "framer-motion";
+import { Star, Quote } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import Image from "next/image";
 
 interface TestimonialCardProps {
   testimonial: {
@@ -21,7 +22,10 @@ interface TestimonialCardProps {
   index?: number;
 }
 
-const TestimonialCard: React.FC<TestimonialCardProps> = ({ testimonial, index = 0 }) => {
+const TestimonialCard: React.FC<TestimonialCardProps> = ({
+  testimonial,
+  index = 0,
+}) => {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -36,7 +40,10 @@ const TestimonialCard: React.FC<TestimonialCardProps> = ({ testimonial, index = 
             <Quote className="w-8 h-8 text-blue-800 opacity-20 group-hover:opacity-40 transition-opacity" />
             <div className="flex items-center space-x-1">
               {[...Array(testimonial.rating)].map((_, i) => (
-                <Star key={i} className="w-4 h-4 text-yellow-500 fill-current" />
+                <Star
+                  key={i}
+                  className="w-4 h-4 text-yellow-500 fill-current"
+                />
               ))}
             </div>
           </div>
@@ -49,10 +56,16 @@ const TestimonialCard: React.FC<TestimonialCardProps> = ({ testimonial, index = 
           {/* Results */}
           {testimonial.results && testimonial.results.length > 0 && (
             <div className="mb-4">
-              <h4 className="text-sm font-semibold text-gray-900 mb-2">Key Results:</h4>
+              <h4 className="text-sm font-semibold text-gray-900 mb-2">
+                Key Results:
+              </h4>
               <div className="flex flex-wrap gap-2">
                 {testimonial.results.map((result, i) => (
-                  <Badge key={i} variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
+                  <Badge
+                    key={i}
+                    variant="outline"
+                    className="text-xs bg-green-50 text-green-700 border-green-200"
+                  >
                     {result}
                   </Badge>
                 ))}
@@ -64,9 +77,11 @@ const TestimonialCard: React.FC<TestimonialCardProps> = ({ testimonial, index = 
           <div className="border-t border-gray-100 pt-4">
             <div className="flex items-center space-x-3">
               {testimonial.image ? (
-                <img
+                <Image
                   src={testimonial.image}
                   alt={testimonial.author}
+                  width={48}
+                  height={48}
                   className="w-12 h-12 rounded-full object-cover"
                 />
               ) : (
@@ -75,12 +90,16 @@ const TestimonialCard: React.FC<TestimonialCardProps> = ({ testimonial, index = 
                 </div>
               )}
               <div className="flex-1">
-                <p className="font-semibold text-gray-900">{testimonial.author}</p>
+                <p className="font-semibold text-gray-900">
+                  {testimonial.author}
+                </p>
                 <p className="text-sm text-gray-600">{testimonial.role}</p>
-                <p className="text-sm text-blue-800 font-medium">{testimonial.company}</p>
+                <p className="text-sm text-blue-800 font-medium">
+                  {testimonial.company}
+                </p>
               </div>
             </div>
-            
+
             {/* Company Details */}
             <div className="mt-3 flex flex-wrap gap-2">
               <Badge variant="outline" className="text-xs">

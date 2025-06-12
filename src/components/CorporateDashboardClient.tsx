@@ -25,6 +25,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
+import Image from 'next/image';
 
 interface DashboardUser {
   id: string;
@@ -512,10 +513,12 @@ const CorporateDashboardClient: React.FC<CorporateDashboardClientProps> = ({
                           >
                             <div className="flex flex-col md:flex-row md:items-center justify-between space-y-3 md:space-y-0">
                               <div className="flex items-center space-x-4">
-                                <img
+                                <Image
                                   src={booking.coach.image}
                                   alt={booking.coach.name}
                                   className="w-12 h-12 rounded-full object-cover"
+                                  width={48}
+                                  height={48}
                                 />
                                 <div>
                                   <h4 className="font-semibold text-gray-900">{booking.employee.name}</h4>

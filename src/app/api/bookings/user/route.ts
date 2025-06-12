@@ -1,15 +1,17 @@
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
+import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
 import connectToDatabase from '@/lib/ConnectDB';
 import Booking from '@/lib/models/Booking';
 import mongoose from 'mongoose';
+import { Session } from 'next-auth';
 
-// Define proper types for the populated booking
+// Define proper types for the populated booking with MongoDB fields
 interface PopulatedCoach {
   _id: mongoose.Types.ObjectId;
   name: string;
   image: string;
+  __v?: number;
 }
 
 interface BookingDocument {
@@ -21,10 +23,23 @@ interface BookingDocument {
   status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
   totalAmount: number;
   videoLink?: string;
+  __v?: number;
+}
+
+interface MongoBookingResult {
+  _id: mongoose.Types.ObjectId;
+  userId: string;
+  coachId: PopulatedCoach;
+  dateTime: Date;
+  duration: number;
+  status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
+  totalAmount: number;
+  videoLink?: string;
+  __v?: number;
 }
 
 // Type guard to validate booking structure
-function isValidBooking(booking: any): booking is BookingDocument {
+function isValidBooking(booking: MongoBookingResult): booking is BookingDocument {
   return booking &&
          booking._id &&
          booking.coachId &&
@@ -36,7 +51,7 @@ function isValidBooking(booking: any): booking is BookingDocument {
 
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getServerSession(authOptions) as Session;
     
     if (!session?.user?.email) {
       return NextResponse.json(
@@ -94,7 +109,7 @@ export async function GET() {
       .populate('coachId', 'name image')
       .sort({ dateTime: 1 })
       .limit(10)
-      .lean();
+      .lean() as MongoBookingResult[];
 
       // Count completed sessions
       const completedSessions = await Booking.countDocuments({
