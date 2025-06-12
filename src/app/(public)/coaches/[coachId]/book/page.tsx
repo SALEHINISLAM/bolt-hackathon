@@ -1,6 +1,14 @@
+// File: app/(public)/coaches/[coachId]/book/page.tsx
+
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import BookingPageClient from '@/components/BookingPageClient';
+
+type Props = {
+  params: {
+    coachId: string;
+  };
+};
 
 async function getCoachData(coachId: string) {
   try {
@@ -15,18 +23,15 @@ async function getCoachData(coachId: string) {
     }
 
     return await response.json();
-  } catch (error) {
-    console.error('Error fetching coach data:', error);
+  } catch (err) {
+    console.error('Error fetching coach data:', err);
     return null;
   }
 }
 
-// ✅ Correct typing: do not reuse or import PageProps
-export async function generateMetadata(
-  props: { params: { coachId: string } }
-): Promise<Metadata> {
-  const coachId = props.params.coachId;
-  const data = await getCoachData(coachId);
+// ✅ Correctly typed generateMetadata
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const data = await getCoachData(params.coachId);
 
   if (!data) {
     return {
@@ -39,17 +44,13 @@ export async function generateMetadata(
 
   return {
     title: `Book ${coach.name} - Career Coaching Session`,
-    description: `Book a personalized career coaching session with ${coach.name}. Expert guidance for your professional development.`,
-    keywords: `book ${coach.name}, career coaching session, ${coach.expertise.join(', ')}, professional coaching`,
+    description: `Book a personalized career coaching session with ${coach.name}.`,
+    keywords: coach.expertise?.join(', ') ?? '',
   };
 }
 
-// ✅ No custom type; just inline destructure and type
-export default async function Page({
-  params,
-}: {
-  params: { coachId: string };
-}) {
+// ✅ Correct default export with typed props
+export default async function BookingPage({ params }: Props) {
   const data = await getCoachData(params.coachId);
 
   if (!data) {
@@ -59,5 +60,5 @@ export default async function Page({
   return <BookingPageClient data={data} coachId={params.coachId} />;
 }
 
-// ✅ Static revalidation
+// ✅ Optional revalidation time
 export const revalidate = 3600;
