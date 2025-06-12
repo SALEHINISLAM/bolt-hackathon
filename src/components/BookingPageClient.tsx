@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { useSession } from 'next-auth/react';
 import { SessionProvider } from 'next-auth/react';
 import { 
   Calendar,  
@@ -19,6 +18,7 @@ import BookingModal from '@/components/BookingModal';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import Image from 'next/image';
 
 interface Coach {
   _id: string;
@@ -43,7 +43,6 @@ interface BookingPageClientProps {
 }
 
 const BookingPageContent: React.FC<BookingPageClientProps> = ({ data, coachId }) => {
-  const { data: session } = useSession();
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
   const { coach } = data;
 
@@ -131,10 +130,12 @@ const BookingPageContent: React.FC<BookingPageClientProps> = ({ data, coachId })
                 <Card className="border-0 shadow-lg">
                   <CardContent className="p-6">
                     <div className="flex items-start space-x-6">
-                      <img
+                      <Image
                         src={coach.image}
                         alt={coach.name}
                         className="w-24 h-24 rounded-full object-cover"
+                        width={96}
+                        height={96}
                       />
                       <div className="flex-1">
                         <h2 className="text-2xl font-bold text-gray-900 mb-2">
