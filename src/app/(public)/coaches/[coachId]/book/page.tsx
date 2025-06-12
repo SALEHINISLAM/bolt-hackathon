@@ -25,6 +25,12 @@ interface BookingPageProps {
   searchParams?: { [key: string]: string | string[] | undefined };
 }
 
+// Define a type that matches Next.js's incorrect expectation
+interface LoosePageProps {
+  params: Promise<{ coachId: string }> | { coachId: string }; // Allow both Promise and plain object
+  searchParams?: { [key: string]: string | string[] | undefined };
+}
+
 export async function generateMetadata(
   { params }: BookingPageProps
 ): Promise<Metadata> {
@@ -46,17 +52,18 @@ export async function generateMetadata(
   };
 }
 
-// @ts-expect-error: Ignore params type mismatch
-const BookingPage: NextPage<BookingPageProps> = async ({ params }) => {
-  console.log('params:', params); // Debug log to inspect params
-  const data = await getCoachData(params.coachId);
+const BookingPage = (async ({ params }: LoosePageProps) => {
+  // Resolve params if it's a Promise, otherwise use it directly
+  const typedParams = await (params instanceof Promise ? params : Promise.resolve(params));
+  console.log('params:', typedParams); // Debug log
+  const data = await getCoachData(typedParams.coachId);
 
   if (!data) {
     notFound();
   }
 
-  return <BookingPageClient data={data} coachId={params.coachId} />;
-};
+  return <BookingPageClient data={data} coachId={typedParams.coachId} />;
+}) as NextPage<BookingPageProps>;
 
 export default BookingPage;
 
