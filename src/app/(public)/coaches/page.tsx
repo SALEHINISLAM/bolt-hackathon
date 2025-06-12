@@ -25,6 +25,7 @@ interface SearchParams {
 
 interface CoachesPageProps {
   searchParams: SearchParams;
+  params: { [key: string]: string | string[] };
 }
 
 export default function CoachesPage({ searchParams }: CoachesPageProps) {
